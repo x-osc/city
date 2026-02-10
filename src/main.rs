@@ -31,18 +31,29 @@ async fn main() {
             cam.target.y += pos.y / cam.zoom.y;
         }
 
+        let mut zoom = cam.zoom.x;
+
         let wheel = mouse_wheel().1;
         if wheel != 0. {
             let before = cam.screen_to_world(Vec2::from(mouse_position()));
 
-            cam.zoom *= 1.0 + wheel / 120. * 0.1;
-            cam.zoom.x = cam.zoom.x.clamp(0.0002, 0.1);
-            cam.zoom.y = screen_width() / screen_height() * cam.zoom.x;
+            #[cfg(target_os = "windows")]
+            {
+                zoom *= 1.0 + wheel / 120. * 0.1;
+            }
+            #[cfg(not(target_os = "windows"))]
+            {
+                zoom *= 1.0 + wheel * 0.1;
+            }
+
+            zoom = zoom.clamp(0.0002, 0.1);
 
             let after = cam.screen_to_world(Vec2::from(mouse_position()));
 
             cam.target += before - after;
         }
+
+        set_zoom(&mut cam, zoom);
 
         set_camera(&cam);
 
@@ -54,4 +65,9 @@ async fn main() {
 
         next_frame().await
     }
+}
+
+fn set_zoom(cam: &mut Camera2D, x_zoom: f32) {
+    cam.zoom.x = x_zoom;
+    cam.zoom.y = screen_width() / screen_height() * x_zoom;
 }
