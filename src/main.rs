@@ -7,6 +7,7 @@ use macroquad::prelude::*;
 use crate::generator::roads::generate_roads;
 
 mod generator;
+mod vec2;
 
 #[macroquad::main("city")]
 async fn main() {
